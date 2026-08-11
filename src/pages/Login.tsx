@@ -29,42 +29,45 @@ export default function Login() {
   }
 
   return (
-    <div
-      style={{ maxWidth: 320, margin: "80px auto", fontFamily: "sans-serif" }}
-    >
-      <h2>ERP Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 12 }}>
-          <label>Email</label>
-          <br />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: 6 }}
-          />
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-brand">StockLine</div>
+        <div className="login-subtitle">Sign in to your account</div>
+
+        <div className="card">
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                className="form-input"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="form-error">{error}</p>}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+              style={{ width: "100%" }}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </button>
+          </form>
         </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>Password</label>
-          <br />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: "100%", padding: 6 }}
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{ padding: "6px 16px" }}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }
