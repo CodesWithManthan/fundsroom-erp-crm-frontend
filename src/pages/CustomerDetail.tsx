@@ -3,6 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { getCustomerById, addCustomerNote } from "../api/customers";
 import type { Customer, CustomerNote } from "../api/customers";
 
+const STATUS_BADGE: Record<Customer["status"], string> = {
+  lead: "badge-gray",
+  active: "badge-green",
+  inactive: "badge-red",
+};
+
 export default function CustomerDetail() {
   const { id } = useParams();
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -10,6 +16,7 @@ export default function CustomerDetail() {
   const [newNote, setNewNote] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   async function load() {
     if (!id) return;
@@ -32,77 +39,106 @@ export default function CustomerDetail() {
   async function handleAddNote(e: React.FormEvent) {
     e.preventDefault();
     if (!id || !newNote.trim()) return;
+    setSubmitting(true);
     try {
       await addCustomerNote(id, newNote);
       setNewNote("");
-      load(); // refresh notes list
+      await load(); // refresh notes list
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add note");
+    } finally {
+      setSubmitting(false);
     }
   }
 
-  if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
-  if (error) return <p style={{ padding: 20, color: "red" }}>{error}</p>;
+  if (loading) return <p className="state-text">Loading...</p>;
+  if (error) return <p className="state-text form-error">{error}</p>;
   if (!customer) return null;
 
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", maxWidth: 500 }}>
-      <Link to="/customers">&larr; Back to list</Link>
-      <h2>{customer.name}</h2>
-      <p>
-        <b>Business:</b> {customer.business_name || "-"}
-      </p>
-      <p>
-        <b>Mobile:</b> {customer.mobile}
-      </p>
-      <p>
-        <b>Email:</b> {customer.email || "-"}
-      </p>
-      <p>
-        <b>Type:</b> {customer.customer_type}
-      </p>
-      <p>
-        <b>Status:</b> {customer.status}
-      </p>
-      <p>
-        <b>GST:</b> {customer.gst_number || "-"}
-      </p>
-      <p>
-        <b>Address:</b> {customer.address || "-"}
-      </p>
-      <p>
-        <b>Follow-up date:</b> {customer.follow_up_date?.slice(0, 10) || "-"}
-      </p>
-      <Link to={`/customers/${customer.id}/edit`}>
-        <button>Edit</button>
+    <div className="page-container" style={{ maxWidth: 640 }}>
+      <Link to="/customers" className="back-link">
+        &larr; Back to Customers
       </Link>
 
-      <h3 style={{ marginTop: 24 }}>Notes</h3>
-      <form onSubmit={handleAddNote} style={{ marginBottom: 16 }}>
+      <div className="detail-header" style={{ marginTop: 12 }}>
+        <div className="detail-header-info">
+          <h2 className="page-title">{customer.name}</h2>
+          <span className={`badge ${STATUS_BADGE[customer.status]}`}>
+            {customer.status}
+          </span>
+        </div>
+        <Link to={`/customers/${customer.id}/edit`}>
+          <button className="btn btn-secondary">Edit</button>
+        </Link>
+      </div>
+
+      <div className="card">
+        <div className="info-grid">
+          <div>
+            <div className="info-item-label">Business</div>
+            <div className="info-item-value">
+              {customer.business_name || "-"}
+            </div>
+          </div>
+          <div>
+            <div className="info-item-label">Mobile</div>
+            <div className="info-item-value">{customer.mobile}</div>
+          </div>
+          <div>
+            <div className="info-item-label">Email</div>
+            <div className="info-item-value">{customer.email || "-"}</div>
+          </div>
+          <div>
+            <div className="info-item-label">Type</div>
+            <div className="info-item-value">{customer.customer_type}</div>
+          </div>
+          <div>
+            <div className="info-item-label">GST Number</div>
+            <div className="info-item-value">{customer.gst_number || "-"}</div>
+          </div>
+          <div>
+            <div className="info-item-label">Follow-up Date</div>
+            <div className="info-item-value">
+              {customer.follow_up_date?.slice(0, 10) || "-"}
+            </div>
+          </div>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <div className="info-item-label">Address</div>
+            <div className="info-item-value">{customer.address || "-"}</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style={{ marginTop: 24, marginBottom: 8 }}>Notes</h3>
+      <form onSubmit={handleAddNote} className="form-group">
         <textarea
+          className="form-textarea"
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           placeholder="Add a follow-up note..."
           rows={3}
-          style={{ width: "100%", padding: 6 }}
         />
-        <button type="submit">Add Note</button>
+        <div className="form-actions">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={submitting}
+          >
+            {submitting ? "Adding..." : "Add Note"}
+          </button>
+        </div>
       </form>
 
-      {notes.length === 0 && <p>No notes yet.</p>}
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {notes.map((n) => (
-          <li
-            key={n.id}
-            style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}
-          >
-            <div>{n.note}</div>
-            <small style={{ color: "#888" }}>
-              {new Date(n.created_at).toLocaleString()}
-            </small>
-          </li>
-        ))}
-      </ul>
+      {notes.length === 0 && <p className="state-text">No notes yet.</p>}
+      {notes.map((n) => (
+        <div key={n.id} className="note-item">
+          <div>{n.note}</div>
+          <small style={{ color: "var(--color-text-muted)" }}>
+            {new Date(n.created_at).toLocaleString()}
+          </small>
+        </div>
+      ))}
     </div>
   );
 }

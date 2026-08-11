@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getCustomers } from "../api/customers";
 import type { Customer } from "../api/customers";
 
+const STATUS_BADGE: Record<Customer["status"], string> = {
+  lead: "badge-gray",
+  active: "badge-green",
+  inactive: "badge-red",
+};
+
 export default function Customers() {
+  const navigate = useNavigate();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -32,34 +39,38 @@ export default function Customers() {
   }
 
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h2>Customers</h2>
-
-      <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
-        <form onSubmit={handleSearchSubmit} style={{ display: "flex", gap: 8 }}>
-          <input
-            placeholder="Search by name, business, mobile..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: 6, width: 260 }}
-          />
-          <button type="submit">Search</button>
-        </form>
+    <div className="page-container">
+      <div className="page-header">
+        <h2 className="page-title">Customers</h2>
         <Link to="/customers/new">
-          <button>+ Add Customer</button>
+          <button className="btn btn-primary">+ Add Customer</button>
         </Link>
       </div>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && customers.length === 0 && <p>No customers found.</p>}
+      <form
+        onSubmit={handleSearchSubmit}
+        style={{ display: "flex", gap: 8, marginBottom: 16 }}
+      >
+        <input
+          className="form-input"
+          placeholder="Search by name, business, mobile..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: 260 }}
+        />
+        <button type="submit" className="btn btn-secondary">
+          Search
+        </button>
+      </form>
+
+      {loading && <p className="state-text">Loading...</p>}
+      {error && <p className="state-text form-error">{error}</p>}
+      {!loading && customers.length === 0 && (
+        <p className="state-text">No customers found.</p>
+      )}
 
       {!loading && customers.length > 0 && (
-        <table
-          border={1}
-          cellPadding={8}
-          style={{ borderCollapse: "collapse", width: "100%" }}
-        >
+        <table className="table">
           <thead>
             <tr>
               <th>Name</th>
@@ -71,14 +82,20 @@ export default function Customers() {
           </thead>
           <tbody>
             {customers.map((c) => (
-              <tr key={c.id}>
-                <td>
-                  <Link to={`/customers/${c.id}`}>{c.name}</Link>
-                </td>
+              <tr
+                key={c.id}
+                className="clickable-row"
+                onClick={() => navigate(`/customers/${c.id}`)}
+              >
+                <td>{c.name}</td>
                 <td>{c.business_name || "-"}</td>
                 <td>{c.mobile}</td>
                 <td>{c.customer_type}</td>
-                <td>{c.status}</td>
+                <td>
+                  <span className={`badge ${STATUS_BADGE[c.status]}`}>
+                    {c.status}
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>

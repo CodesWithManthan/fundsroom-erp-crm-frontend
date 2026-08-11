@@ -12,6 +12,8 @@ export async function authFetch(path: string, options: RequestInit = {}) {
     },
   });
 
+  // some error responses (network fail, empty body, non-JSON) won't parse —
+  // fall back to {} so we still hit the !res.ok check below instead of throwing here
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {

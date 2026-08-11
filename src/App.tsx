@@ -12,6 +12,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Challans from "./pages/Challans";
 import ChallanForm from "./pages/ChallanForm";
 import ChallanDetail from "./pages/ChallanDetail";
+import "./styles/global.css";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token } = useAuth();

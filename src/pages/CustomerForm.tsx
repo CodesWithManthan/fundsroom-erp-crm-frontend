@@ -27,6 +27,7 @@ export default function CustomerForm() {
   const [form, setForm] = useState<Partial<Customer>>(EMPTY);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(isEdit);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (isEdit && id) {
@@ -44,6 +45,7 @@ export default function CustomerForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
     try {
       if (isEdit && id) {
         await updateCustomer(id, form);
@@ -53,91 +55,128 @@ export default function CustomerForm() {
       navigate("/customers");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed");
+      setSubmitting(false);
     }
   }
 
-  if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
+  if (loading) return <p className="state-text">Loading...</p>;
 
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", maxWidth: 480 }}>
-      <h2>{isEdit ? "Edit Customer" : "New Customer"}</h2>
-      <form onSubmit={handleSubmit}>
-        <Field
-          label="Name *"
-          value={form.name}
-          onChange={(v) => handleChange("name", v)}
-          required
-        />
-        <Field
-          label="Mobile *"
-          value={form.mobile}
-          onChange={(v) => handleChange("mobile", v)}
-          required
-        />
-        <Field
-          label="Email"
-          value={form.email}
-          onChange={(v) => handleChange("email", v)}
-        />
-        <Field
-          label="Business Name"
-          value={form.business_name}
-          onChange={(v) => handleChange("business_name", v)}
-        />
-        <Field
-          label="GST Number"
-          value={form.gst_number}
-          onChange={(v) => handleChange("gst_number", v)}
-        />
-        <div style={{ marginBottom: 12 }}>
-          <label>Customer Type *</label>
-          <br />
-          <select
-            value={form.customer_type}
-            onChange={(e) => handleChange("customer_type", e.target.value)}
-            style={{ width: "100%", padding: 6 }}
-          >
-            <option value="retail">Retail</option>
-            <option value="wholesale">Wholesale</option>
-            <option value="distributor">Distributor</option>
-          </select>
-        </div>
-        <div style={{ marginBottom: 12 }}>
-          <label>Status</label>
-          <br />
-          <select
-            value={form.status}
-            onChange={(e) => handleChange("status", e.target.value)}
-            style={{ width: "100%", padding: 6 }}
-          >
-            <option value="lead">Lead</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-        <Field
-          label="Address"
-          value={form.address}
-          onChange={(v) => handleChange("address", v)}
-        />
-        <div style={{ marginBottom: 12 }}>
-          <label>Follow-up Date</label>
-          <br />
-          <input
-            type="date"
-            value={form.follow_up_date ? form.follow_up_date.slice(0, 10) : ""}
-            onChange={(e) => handleChange("follow_up_date", e.target.value)}
-            style={{ padding: 6 }}
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">
-          {isEdit ? "Save Changes" : "Create Customer"}
-        </button>{" "}
-        <button type="button" onClick={() => navigate("/customers")}>
-          Cancel
-        </button>
-      </form>
+    <div className="page-container" style={{ maxWidth: 640 }}>
+      <div className="page-header">
+        <h2 className="page-title">
+          {isEdit ? "Edit Customer" : "New Customer"}
+        </h2>
+      </div>
+
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+          <div className="form-section-title">Basic Info</div>
+          <div className="form-grid">
+            <Field
+              label="Name *"
+              value={form.name}
+              onChange={(v) => handleChange("name", v)}
+              required
+            />
+            <Field
+              label="Mobile *"
+              value={form.mobile}
+              onChange={(v) => handleChange("mobile", v)}
+              required
+            />
+            <Field
+              label="Email"
+              value={form.email}
+              onChange={(v) => handleChange("email", v)}
+            />
+            <div className="form-group">
+              <label className="form-label">Customer Type *</label>
+              <select
+                className="form-select"
+                value={form.customer_type}
+                onChange={(e) => handleChange("customer_type", e.target.value)}
+              >
+                <option value="retail">Retail</option>
+                <option value="wholesale">Wholesale</option>
+                <option value="distributor">Distributor</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-section-title">Business Details</div>
+          <div className="form-grid">
+            <Field
+              label="Business Name"
+              value={form.business_name}
+              onChange={(v) => handleChange("business_name", v)}
+            />
+            <Field
+              label="GST Number"
+              value={form.gst_number}
+              onChange={(v) => handleChange("gst_number", v)}
+            />
+            <div className="form-group form-grid-full">
+              <label className="form-label">Address</label>
+              <textarea
+                className="form-textarea"
+                rows={2}
+                value={form.address || ""}
+                onChange={(e) => handleChange("address", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="form-section-title">Status</div>
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">Status</label>
+              <select
+                className="form-select"
+                value={form.status}
+                onChange={(e) => handleChange("status", e.target.value)}
+              >
+                <option value="lead">Lead</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Follow-up Date</label>
+              <input
+                type="date"
+                className="form-input"
+                value={
+                  form.follow_up_date ? form.follow_up_date.slice(0, 10) : ""
+                }
+                onChange={(e) => handleChange("follow_up_date", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {error && <p className="form-error">{error}</p>}
+          <div className="form-actions">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={submitting}
+            >
+              {submitting
+                ? "Saving..."
+                : isEdit
+                  ? "Save Changes"
+                  : "Create Customer"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate("/customers")}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
@@ -154,14 +193,13 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div style={{ marginBottom: 12 }}>
-      <label>{label}</label>
-      <br />
+    <div className="form-group">
+      <label className="form-label">{label}</label>
       <input
+        className="form-input"
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        style={{ width: "100%", padding: 6 }}
       />
     </div>
   );

@@ -1,32 +1,58 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Nav() {
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   if (!user) return null;
 
+  const initials = user.name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <nav
-      style={{
-        padding: "10px 20px",
-        borderBottom: "1px solid #ccc",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <div style={{ display: "flex", gap: 16 }}>
-        <Link to="/customers">Customers</Link>
-        <Link to="/products">Products</Link>
-        <Link to="/challans">Challans</Link>
+    <nav className="navbar">
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <span className="navbar-brand">StockLine</span>
+        <div className="navbar-links">
+          <Link
+            to="/customers"
+            className={
+              location.pathname.startsWith("/customers") ? "active" : ""
+            }
+          >
+            Customers
+          </Link>
+          <Link
+            to="/products"
+            className={
+              location.pathname.startsWith("/products") ? "active" : ""
+            }
+          >
+            Products
+          </Link>
+          <Link
+            to="/challans"
+            className={
+              location.pathname.startsWith("/challans") ? "active" : ""
+            }
+          >
+            Challans
+          </Link>
+        </div>
       </div>
-      <div>
-        <span style={{ marginRight: 12 }}>
+      <div className="navbar-user">
+        <div className="avatar-circle">{initials}</div>
+        <span>
           {user.name} ({user.role})
         </span>
-        <button onClick={logout}>Logout</button>
+        <button className="btn btn-secondary" onClick={logout}>
+          Logout
+        </button>
       </div>
     </nav>
   );

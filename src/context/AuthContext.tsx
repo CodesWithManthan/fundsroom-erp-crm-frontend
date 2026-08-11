@@ -18,6 +18,7 @@ interface AuthState {
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // read from localStorage so a page refresh doesn't log the user out
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token"),
   );
