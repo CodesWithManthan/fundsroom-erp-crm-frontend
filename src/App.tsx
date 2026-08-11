@@ -9,6 +9,9 @@ import CustomerDetail from "./pages/CustomerDetail";
 import Products from "./pages/Products";
 import ProductForm from "./pages/ProductForm";
 import ProductDetail from "./pages/ProductDetail";
+import Challans from "./pages/Challans";
+import ChallanForm from "./pages/ChallanForm";
+import ChallanDetail from "./pages/ChallanDetail";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token } = useAuth();
@@ -82,6 +85,30 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <ProductDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/challans"
+          element={
+            <ProtectedRoute>
+              <Challans />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/challans/new"
+          element={
+            <ProtectedRoute>
+              <ChallanForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/challans/:id"
+          element={
+            <ProtectedRoute>
+              <ChallanDetail />
             </ProtectedRoute>
           }
         />

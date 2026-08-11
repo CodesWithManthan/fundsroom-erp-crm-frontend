@@ -20,6 +20,7 @@ export default function Nav() {
       <div style={{ display: "flex", gap: 16 }}>
         <Link to="/customers">Customers</Link>
         <Link to="/products">Products</Link>
+        <Link to="/challans">Challans</Link>
       </div>
       <div>
         <span style={{ marginRight: 12 }}>
