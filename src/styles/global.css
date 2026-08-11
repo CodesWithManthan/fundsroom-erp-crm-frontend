@@ -445,3 +445,163 @@ body {
   font-size: 13px;
   margin-bottom: var(--space-lg);
 }
+
+/* Challan list — summary strip */
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.summary-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+}
+
+.summary-box-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.summary-box-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.summary-box.accent-draft .summary-box-value {
+  color: #8a5a00;
+}
+.summary-box.accent-confirmed .summary-box-value {
+  color: var(--color-primary);
+}
+.summary-box.accent-cancelled .summary-box-value {
+  color: var(--color-danger);
+}
+
+/* Challan detail — invoice-style table */
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--space-lg);
+}
+
+.invoice-table th,
+.invoice-table td {
+  text-align: left;
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--color-gray-light);
+}
+
+.invoice-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.invoice-table td.num,
+.invoice-table th.num {
+  text-align: right;
+}
+
+.invoice-total-row td {
+  border-bottom: none;
+  border-top: 2px solid var(--color-text);
+  font-weight: 700;
+  font-size: 15px;
+  padding-top: var(--space-md);
+}
+
+/* Challan detail — action panel */
+.action-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-lg);
+}
+
+.action-panel-text {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.status-banner {
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius);
+  margin-top: var(--space-lg);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.status-banner.confirmed {
+  background: #e6f4ea;
+  color: var(--color-primary);
+}
+
+.status-banner.cancelled {
+  background: var(--color-gray-light);
+  color: var(--color-text-muted);
+}
+
+/* Challan form — line items */
+.line-item-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-gray-light);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-sm);
+  background: var(--color-surface);
+}
+
+.line-item-row select.form-select {
+  flex: 2;
+}
+
+.line-item-row input.form-input {
+  flex: 1;
+}
+
+.line-item-warning {
+  font-size: 12px;
+  color: #8a5a00;
+  white-space: nowrap;
+}
+
+.add-line-btn {
+  border: 1px dashed var(--color-gray-light);
+  background: none;
+  color: var(--color-text-muted);
+  padding: var(--space-sm);
+  width: 100%;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  margin-bottom: var(--space-lg);
+}
+
+.add-line-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.draft-notice {
+  background: var(--color-bg);
+  border-left: 3px solid var(--color-gray);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-lg);
+}

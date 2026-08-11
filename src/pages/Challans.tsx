@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getChallans } from "../api/challans";
 import type { Challan } from "../api/challans";
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: "#fff3cd",
-  confirmed: "#d4edda",
-  cancelled: "#f8d7da",
+const STATUS_BADGE: Record<Challan["status"], string> = {
+  draft: "badge-yellow",
+  confirmed: "badge-green",
+  cancelled: "badge-red",
 };
 
 export default function Challans() {
+  const navigate = useNavigate();
   const [challans, setChallans] = useState<Challan[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
@@ -37,19 +38,47 @@ export default function Challans() {
     load(value);
   }
 
-  return (
-    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h2>Sales Challans</h2>
+  // counts are computed from whatever's currently loaded, not a separate API call
+  const draftCount = challans.filter((c) => c.status === "draft").length;
+  const confirmedCount = challans.filter(
+    (c) => c.status === "confirmed",
+  ).length;
+  const cancelledCount = challans.filter(
+    (c) => c.status === "cancelled",
+  ).length;
 
-      <div
-        style={{
-          marginBottom: 16,
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-        }}
-      >
+  return (
+    <div className="page-container">
+      <div className="page-header">
+        <h2 className="page-title">Sales Challans</h2>
+        <Link to="/challans/new">
+          <button className="btn btn-primary">+ New Challan</button>
+        </Link>
+      </div>
+
+      <div className="summary-strip">
+        <div className="summary-box">
+          <div className="summary-box-label">Total</div>
+          <div className="summary-box-value">{challans.length}</div>
+        </div>
+        <div className="summary-box accent-draft">
+          <div className="summary-box-label">Draft</div>
+          <div className="summary-box-value">{draftCount}</div>
+        </div>
+        <div className="summary-box accent-confirmed">
+          <div className="summary-box-label">Confirmed</div>
+          <div className="summary-box-value">{confirmedCount}</div>
+        </div>
+        <div className="summary-box accent-cancelled">
+          <div className="summary-box-label">Cancelled</div>
+          <div className="summary-box-value">{cancelledCount}</div>
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 16 }}>
         <select
+          className="form-select"
+          style={{ width: 200 }}
           value={statusFilter}
           onChange={(e) => handleFilterChange(e.target.value)}
         >
@@ -58,21 +87,16 @@ export default function Challans() {
           <option value="confirmed">Confirmed</option>
           <option value="cancelled">Cancelled</option>
         </select>
-        <Link to="/challans/new">
-          <button>+ New Challan</button>
-        </Link>
       </div>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && challans.length === 0 && <p>No challans found.</p>}
+      {loading && <p className="state-text">Loading...</p>}
+      {error && <p className="state-text form-error">{error}</p>}
+      {!loading && challans.length === 0 && (
+        <p className="state-text">No challans found.</p>
+      )}
 
       {!loading && challans.length > 0 && (
-        <table
-          border={1}
-          cellPadding={8}
-          style={{ borderCollapse: "collapse", width: "100%" }}
-        >
+        <table className="table">
           <thead>
             <tr>
               <th>Challan #</th>
@@ -84,13 +108,19 @@ export default function Challans() {
           </thead>
           <tbody>
             {challans.map((c) => (
-              <tr key={c.id} style={{ background: STATUS_COLORS[c.status] }}>
-                <td>
-                  <Link to={`/challans/${c.id}`}>{c.challan_number}</Link>
-                </td>
+              <tr
+                key={c.id}
+                className="clickable-row"
+                onClick={() => navigate(`/challans/${c.id}`)}
+              >
+                <td>{c.challan_number}</td>
                 <td>{c.customer_name}</td>
                 <td>{c.total_quantity}</td>
-                <td>{c.status}</td>
+                <td>
+                  <span className={`badge ${STATUS_BADGE[c.status]}`}>
+                    {c.status}
+                  </span>
+                </td>
                 <td>{new Date(c.created_at).toLocaleDateString()}</td>
               </tr>
             ))}

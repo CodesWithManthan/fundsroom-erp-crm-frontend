@@ -3,6 +3,12 @@ import { useParams, Link } from "react-router-dom";
 import { getChallanById, confirmChallan, cancelChallan } from "../api/challans";
 import type { Challan, ChallanItem } from "../api/challans";
 
+const STATUS_BADGE: Record<Challan["status"], string> = {
+  draft: "badge-yellow",
+  confirmed: "badge-green",
+  cancelled: "badge-red",
+};
+
 export default function ChallanDetail() {
   const { id } = useParams();
   const [challan, setChallan] = useState<Challan | null>(null);
@@ -35,7 +41,7 @@ export default function ChallanDetail() {
     setActionLoading(true);
     try {
       await confirmChallan(id);
-      load(); // refresh to show confirmed status
+      await load(); // refresh to show confirmed status
     } catch (err) {
       // insufficient stock (409) or double-confirm (409) both surface here
       setError(err instanceof Error ? err.message : "Confirm failed");
@@ -50,7 +56,7 @@ export default function ChallanDetail() {
     setActionLoading(true);
     try {
       await cancelChallan(id);
-      load();
+      await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cancel failed");
     } finally {
@@ -58,45 +64,62 @@ export default function ChallanDetail() {
     }
   }
 
-  if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
+  if (loading) return <p className="state-text">Loading...</p>;
   if (!challan)
-    return <p style={{ padding: 20, color: "red" }}>{error || "Not found"}</p>;
+    return <p className="state-text form-error">{error || "Not found"}</p>;
 
+  const total = items.reduce((sum, item) => sum + Number(item.subtotal), 0);
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", maxWidth: 600 }}>
-      <Link to="/challans">&larr; Back to list</Link>
-      <h2>{challan.challan_number}</h2>
-      <p>
-        <b>Customer:</b> {challan.customer_name}
-      </p>
-      <p>
-        <b>Status:</b> {challan.status}
-      </p>
-      <p>
-        <b>Total Quantity:</b> {challan.total_quantity}
-      </p>
-      <p>
-        <b>Created:</b> {new Date(challan.created_at).toLocaleString()}
-      </p>
-      {challan.confirmed_at && (
-        <p>
-          <b>Confirmed:</b> {new Date(challan.confirmed_at).toLocaleString()}
-        </p>
-      )}
+    <div className="page-container" style={{ maxWidth: 700 }}>
+      <Link to="/challans" className="back-link">
+        &larr; Back to Challans
+      </Link>
 
-      <h3>Items</h3>
-      <table
-        border={1}
-        cellPadding={6}
-        style={{ borderCollapse: "collapse", width: "100%", marginBottom: 16 }}
-      >
+      <div className="detail-header" style={{ marginTop: 12 }}>
+        <div className="detail-header-info">
+          <h2 className="page-title">{challan.challan_number}</h2>
+          <span className={`badge ${STATUS_BADGE[challan.status]}`}>
+            {challan.status}
+          </span>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="info-grid">
+          <div>
+            <div className="info-item-label">Customer</div>
+            <div className="info-item-value">{challan.customer_name}</div>
+          </div>
+          <div>
+            <div className="info-item-label">Total Quantity</div>
+            <div className="info-item-value">{challan.total_quantity}</div>
+          </div>
+          <div>
+            <div className="info-item-label">Created</div>
+            <div className="info-item-value">
+              {new Date(challan.created_at).toLocaleString()}
+            </div>
+          </div>
+          {challan.confirmed_at && (
+            <div>
+              <div className="info-item-label">Confirmed</div>
+              <div className="info-item-value">
+                {new Date(challan.confirmed_at).toLocaleString()}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <h3 style={{ marginTop: 24, marginBottom: 8 }}>Items</h3>
+      <table className="invoice-table">
         <thead>
           <tr>
             <th>Product</th>
             <th>SKU</th>
-            <th>Price (at time of sale)</th>
-            <th>Qty</th>
-            <th>Subtotal</th>
+            <th className="num">Price (at sale)</th>
+            <th className="num">Qty</th>
+            <th className="num">Subtotal</th>
           </tr>
         </thead>
         <tbody>
@@ -104,31 +127,52 @@ export default function ChallanDetail() {
             <tr key={item.id}>
               <td>{item.product_name_snapshot}</td>
               <td>{item.product_sku_snapshot}</td>
-              <td>₹{item.unit_price_snapshot}</td>
-              <td>{item.quantity}</td>
-              <td>₹{item.subtotal}</td>
+              <td className="num">₹{item.unit_price_snapshot}</td>
+              <td className="num">{item.quantity}</td>
+              <td className="num">₹{item.subtotal}</td>
             </tr>
           ))}
+          <tr className="invoice-total-row">
+            <td colSpan={4}>Total</td>
+            <td className="num">₹{total}</td>
+          </tr>
         </tbody>
       </table>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
 
       {challan.status === "draft" && (
-        <div>
-          <button onClick={handleConfirm} disabled={actionLoading}>
-            {actionLoading ? "Processing..." : "Confirm (reduce stock)"}
-          </button>{" "}
-          <button onClick={handleCancel} disabled={actionLoading}>
-            Cancel Challan
-          </button>
+        <div className="action-panel">
+          <span className="action-panel-text">
+            This challan is a draft. Confirming will reduce stock.
+          </span>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              className="btn btn-secondary"
+              onClick={handleCancel}
+              disabled={actionLoading}
+            >
+              Cancel Challan
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleConfirm}
+              disabled={actionLoading}
+            >
+              {actionLoading ? "Processing..." : "Confirm & Reduce Stock"}
+            </button>
+          </div>
         </div>
       )}
       {challan.status === "confirmed" && (
-        <p style={{ color: "green" }}>✔ Confirmed — stock reduced.</p>
+        <div className="status-banner confirmed">
+          ✔ Confirmed — stock has been reduced.
+        </div>
       )}
       {challan.status === "cancelled" && (
-        <p style={{ color: "gray" }}>Cancelled — no stock impact.</p>
+        <div className="status-banner cancelled">
+          Cancelled — no stock impact.
+        </div>
       )}
     </div>
   );

@@ -88,89 +88,98 @@ export default function ChallanForm() {
   }
 
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif", maxWidth: 600 }}>
-      <h2>New Challan</h2>
-      <p style={{ color: "#666" }}>
+    <div className="page-container" style={{ maxWidth: 680 }}>
+      <div className="page-header">
+        <h2 className="page-title">New Challan</h2>
+      </div>
+
+      {/* drafts intentionally skip stock validation — stock is only checked/reduced on confirm */}
+      <div className="draft-notice">
         Saves as Draft — stock is not affected until confirmed.
-      </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: 16 }}>
-          <label>Customer *</label>
-          <br />
-          <select
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
-            style={{ width: "100%", padding: 6 }}
-          >
-            <option value="">-- Select customer --</option>
-            {customers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} {c.business_name ? `(${c.business_name})` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <h4>Products</h4>
-        {lines.map((line, i) => {
-          const stock = productStock(line.product_id);
-          return (
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                gap: 8,
-                marginBottom: 8,
-                alignItems: "center",
-              }}
+      <div className="card">
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Customer *</label>
+            <select
+              className="form-select"
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
             >
-              <select
-                value={line.product_id}
-                onChange={(e) => updateLine(i, "product_id", e.target.value)}
-                style={{ flex: 2, padding: 6 }}
-              >
-                <option value="">-- Select product --</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} (₹{p.unit_price}) — stock: {p.current_stock}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                placeholder="Qty"
-                value={line.quantity}
-                onChange={(e) => updateLine(i, "quantity", e.target.value)}
-                style={{ flex: 1, padding: 6 }}
-              />
-              {stock !== null && Number(line.quantity) > stock && (
-                <span style={{ color: "orange", fontSize: 12 }}>
-                  exceeds current stock ({stock})
-                </span>
-              )}
-              {lines.length > 1 && (
-                <button type="button" onClick={() => removeLine(i)}>
-                  Remove
-                </button>
-              )}
-            </div>
-          );
-        })}
-        <button type="button" onClick={addLine} style={{ marginBottom: 16 }}>
-          + Add another product
-        </button>
+              <option value="">-- Select customer --</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.business_name ? `(${c.business_name})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <div>
-          <button type="submit" disabled={loading}>
-            {loading ? "Saving..." : "Save as Draft"}
-          </button>{" "}
-          <button type="button" onClick={() => navigate("/challans")}>
-            Cancel
+          <div className="form-section-title">Products</div>
+          {lines.map((line, i) => {
+            const stock = productStock(line.product_id);
+            return (
+              <div key={i} className="line-item-row">
+                <select
+                  className="form-select"
+                  value={line.product_id}
+                  onChange={(e) => updateLine(i, "product_id", e.target.value)}
+                >
+                  <option value="">-- Select product --</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} (₹{p.unit_price}) — stock: {p.current_stock}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  className="form-input"
+                  placeholder="Qty"
+                  value={line.quantity}
+                  onChange={(e) => updateLine(i, "quantity", e.target.value)}
+                />
+                {stock !== null && Number(line.quantity) > stock && (
+                  <span className="line-item-warning">
+                    exceeds stock ({stock})
+                  </span>
+                )}
+                {lines.length > 1 && (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => removeLine(i)}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            );
+          })}
+          <button type="button" className="add-line-btn" onClick={addLine}>
+            + Add another product
           </button>
-        </div>
-      </form>
+
+          {error && <p className="form-error">{error}</p>}
+          <div className="form-actions">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save as Draft"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate("/challans")}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
