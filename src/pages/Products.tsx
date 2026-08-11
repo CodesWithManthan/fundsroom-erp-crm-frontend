@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getProducts } from "../api/products";
 import type { Product } from "../api/products";
 
 export default function Products() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -32,34 +33,38 @@ export default function Products() {
   }
 
   return (
-    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h2>Products</h2>
-
-      <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
-        <form onSubmit={handleSearchSubmit} style={{ display: "flex", gap: 8 }}>
-          <input
-            placeholder="Search by name, SKU, category..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: 6, width: 260 }}
-          />
-          <button type="submit">Search</button>
-        </form>
+    <div className="page-container">
+      <div className="page-header">
+        <h2 className="page-title">Products</h2>
         <Link to="/products/new">
-          <button>+ Add Product</button>
+          <button className="btn btn-primary">+ Add Product</button>
         </Link>
       </div>
 
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && products.length === 0 && <p>No products found.</p>}
+      <form
+        onSubmit={handleSearchSubmit}
+        style={{ display: "flex", gap: 8, marginBottom: 16 }}
+      >
+        <input
+          className="form-input"
+          placeholder="Search by name, SKU, category..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: 260 }}
+        />
+        <button type="submit" className="btn btn-secondary">
+          Search
+        </button>
+      </form>
+
+      {loading && <p className="state-text">Loading...</p>}
+      {error && <p className="state-text form-error">{error}</p>}
+      {!loading && products.length === 0 && (
+        <p className="state-text">No products found.</p>
+      )}
 
       {!loading && products.length > 0 && (
-        <table
-          border={1}
-          cellPadding={8}
-          style={{ borderCollapse: "collapse", width: "100%" }}
-        >
+        <table className="table">
           <thead>
             <tr>
               <th>Name</th>
@@ -75,17 +80,23 @@ export default function Products() {
               return (
                 <tr
                   key={p.id}
-                  style={low ? { background: "#fff3cd" } : undefined}
+                  className="clickable-row"
+                  onClick={() => navigate(`/products/${p.id}`)}
                 >
-                  <td>
-                    <Link to={`/products/${p.id}`}>{p.name}</Link>
-                  </td>
+                  <td>{p.name}</td>
                   <td>{p.sku}</td>
                   <td>{p.category || "-"}</td>
                   <td>₹{p.unit_price}</td>
                   <td>
                     {p.current_stock}
-                    {low ? " ⚠ low" : ""}
+                    {low && (
+                      <span
+                        className="badge badge-yellow"
+                        style={{ marginLeft: 6 }}
+                      >
+                        Low
+                      </span>
+                    )}
                   </td>
                 </tr>
               );
