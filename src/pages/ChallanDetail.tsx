@@ -63,6 +63,23 @@ export default function ChallanDetail() {
       setActionLoading(false);
     }
   }
+  async function handleDownloadPdf() {
+    if (!challan) return;
+    const token = localStorage.getItem("token");
+    const res = await fetch(
+      `http://localhost:5000/challans/${challan.id}/pdf`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${challan.challan_number}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
 
   if (loading) return <p className="state-text">Loading...</p>;
   if (!challan)
@@ -82,6 +99,9 @@ export default function ChallanDetail() {
             {challan.status}
           </span>
         </div>
+        <button className="btn btn-secondary" onClick={handleDownloadPdf}>
+          Download PDF
+        </button>
       </div>
 
       <div className="card">
