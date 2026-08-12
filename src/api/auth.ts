@@ -1,4 +1,4 @@
-const BASE_URL = "./client";
+import { BASE_URL } from "./client";
 
 export async function loginUser(email: string, password: string) {
   const res = await fetch(`${BASE_URL}/auth/login`, {
