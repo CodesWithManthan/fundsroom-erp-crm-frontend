@@ -14,6 +14,7 @@ import ChallanForm from "./pages/ChallanForm";
 import ChallanDetail from "./pages/ChallanDetail";
 import "./styles/global.css";
 
+//rebuild bug
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   return token ? <>{children}</> : <Navigate to="/login" replace />;
